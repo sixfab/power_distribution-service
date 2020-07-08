@@ -1,0 +1,560 @@
+openapi: 3.0.0
+info:
+  description: |
+    # Introduction
+    This API is documented in **OpenAPI format** and is based on
+    Sixfab UPS HAT.
+
+  version: 0.1.0
+  title: Sixfab UPS HAT API
+  termsOfService: 'https://sixfab.com/terms'
+  contact:
+    name: Sixfab
+    email: hello@sixfab.com
+    url: www.sixfab.com
+  x-logo:
+    url: 'https://pbs.twimg.com/profile_images/741171472635432960/VIdNV5tU_400x400.jpg'
+    altText: Sixfab
+tags:
+  - name: metrics
+    description: Data of sensors
+    x-displayName: Metrics
+  - name: signals
+    description: Triggers for HAT sync
+    x-displayName: Signals
+  - name: configurations
+    description: Update or get configurations
+    x-displayName: Configurations
+  - name: events
+    description: Manage scheduled events
+    x-displayName: Events
+x-tagGroups:
+  - name: Endpoints
+    tags:
+      - metrics
+      - signals
+      - configurations
+      - events
+
+paths:
+  /metrics/{sensor}/{metric}:
+    parameters:
+      - name: sensor
+        in: path
+        description: Sensor name
+        required: true
+        schema:
+          enum: ['battery', 'system', 'input', 'fan']
+          example: battery
+          type: string
+      - name: metric
+        in: path
+        description: Metric name
+        required: true
+        schema:
+          enum: ['temperature', 'voltage', 'current', 'power', 'level', 'health', 'speed']
+          example: temperature
+          type: string
+    get:
+      tags:
+        - metrics
+
+      summary: Get metric of a sensor
+      description: Read metrics from sensors
+      operationId: getMetricBySensor
+
+      
+      responses:
+        '200':
+          description: Returned metric value
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sensor:
+                    type: string
+                    example: battery
+                  metric: 
+                    type: string
+                    example: temperature
+                  value:
+                    type: float
+                    example: 33.0
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  err:
+                    type: string
+                    example: Sensor or metric name is not valid.
+      
+      x-codeSamples:
+        - lang: 'Python'
+          source: |
+            import requests
+
+            response = requests.get(
+              "localhost:6060/metrics/battery/temperature"
+            ).json()
+
+            print(response)
+
+
+  /metrics/{metric}:
+    parameters:
+      - name: metric
+        in: path
+        description: Metric name
+        required: true
+        schema:
+          enum: ['working_mode', 'rtc', 'version', 'button1', 'button2']
+          example: working_mode
+          type: string
+    get:
+      tags:
+        - metrics
+
+      summary: Get system metrics
+      description: Get a non-sensor-spesific metric
+      operationId: getMetric
+
+      
+      responses:
+        '200':
+          description: Returned metric value
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  metric: 
+                    type: string
+                    example: working_mode
+                  value:
+                    example: "battery_powered"
+        '404':
+          description: Metric not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  err:
+                    type: string
+                    default: Metric '{metric}' not exists.
+      
+      x-codeSamples:
+        - lang: 'Python'
+          source: |
+            import requests
+
+            response = requests.get(
+              "localhost:6060/metrics/working_mode"
+            ).json()
+
+            print(response)
+
+
+  /signals/{signal}:
+    parameters:
+      - name: signal
+        in: path
+        description: Signal name
+        required: true
+        schema:
+          enum: ['soft_reboot', 'soft_shutdown', 'hard_reboot', 'hard_shutdown', 'system_temperature', 'watchdog_alarm']
+          example: system_temperature
+          type: string
+    get:
+      tags:
+        - signals
+
+      summary: Trigger signal
+      description: Feed hat or get routine values from hat, we are calling them as signal
+      operationId: triggerSignal
+
+      
+      responses:
+        '200':
+          description: Signal status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  signal:
+                    type: string
+                    example: system_temparature
+                  value:
+                    type: boolean
+                    example: true
+
+        '404':
+          description: Signal not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  err:
+                    type: string
+                    example: Signal not exists.
+      
+      x-codeSamples:
+        - lang: 'Python'
+          source: |
+            import requests
+
+            response = requests.get(
+              "localhost:6060/signals/system_temperature"
+            ).json()
+
+            print(response)
+
+
+
+  /configurations:
+    post:
+      tags:
+        - configurations
+
+      summary: Update configurations
+      description: |
+        Update configurations and write to HAT
+
+        Available configuration keys: *fan, battery, rtc, watchdog, rgb*
+
+        **KEEP IN MIND:** At least one of them required in request body as json.
+      operationId: updateConfigurations
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fan:
+                  type: object
+                  required:
+                    - slow_threshold
+                  properties:
+                    slow_threshold:
+                      type: integer
+                      example: 45
+                    fast_threshold:
+                      type: integer
+                      example: 75
+                battery:
+                  type: object
+                  properties:
+                    safe_shutdown_level:
+                      type: integer
+                      example: 20
+                    max_charge_level:
+                      type: integer
+                      example: 80
+                    design_capacity:
+                      type: integer
+                      example: 2500
+                rtc:
+                  type: object
+                  required:
+                    - timestamp
+                  properties:
+                    timestamp:
+                      type: integer
+                      example: 1594218320
+                watchdog:
+                  type: object
+                  required:
+                    - is_enabled
+                  properties:
+                    is_enabled:
+                      type: boolean
+                      example: False
+                rgb:
+                  type: object
+                  required:
+                    - "type"
+                  properties:
+                    type:
+                      type: string
+                      enum: ['disabled', 'heartbeat', 'temperature_map']
+                      example: heartbeat
+                    color:
+                      type: string
+                      enum: ['green', 'blue', 'red', 'yellow', 'cyan', 'magenta', 'white']
+                      default: green
+                    speed:
+                      type: string
+                      enum: ['slow', 'normal', 'fast']
+                      default: normal
+
+      responses:
+        '200':
+          description: Configurations updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    default: Configurations updated.
+
+        '404':
+          description: Key not valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  err:
+                    type: string
+                    default: Key {configKey} is not valid configuration key.
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  err:
+                    type: string
+                    example: Json body missing
+      
+
+      x-codeSamples:
+        - lang: 'Python'
+          source: |
+            import requests
+
+            requests.post(
+              "http://localhost:6060/configurations", 
+              json={
+                "rgb": {
+                  "type": "temperature_map"
+                },
+                "battery": {
+                  "safe_shutdown_level": 15
+                } 
+              }
+            )
+
+
+  /configurations/{configKey}:
+    parameters:
+      - name: configKey
+        in: path
+        description: Key of config
+        required: true
+        schema:
+          enum: ['led', 'watchdog', 'fan', 'battery', 'rtc']
+          example: fan
+          type: string
+    get:
+      tags:
+        - configurations
+
+      summary: Get config
+      description: Get current value of configurations
+      operationId: getConfigByKey
+
+      
+      responses:
+        '200':
+          description: Value returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  key:
+                    type: string
+                    description: Config key
+                    example: fan
+                  value:
+                    type: object
+
+        '404':
+          description: Config not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  err:
+                    type: string
+                    default: The key '{configKey}' is not valid configuration key.
+      
+      x-codeSamples:
+        - lang: 'Python'
+          source: |
+            import requests
+
+            response = requests.get(
+              "localhost:6060/configurations/fan"
+            ).json()
+
+            print(response)
+
+
+  /events:
+    get:
+      tags:
+        - events
+
+      summary: Get event IDs
+      description: Get IDs of all events from HAT storage
+      operationId: getEventIds
+      
+      responses:
+        '200':
+          description: Event IDs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ids:
+                    type: array
+                    example: [1, 2]
+
+      x-codeSamples:
+        - lang: 'Python'
+          source: |
+            import requests
+
+            response = requests.get(
+              "localhost:6060/events"
+            ).json()
+
+            print(response)
+
+    delete:
+      tags:
+        - events
+
+      summary: Delete events
+      description: Delete events by event IDs
+      operationId: deleteEventsById
+      
+      responses:
+        '200':
+          description: Event IDs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ids:
+                    type: array
+                    example: [1, 2]
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  err:
+                    type: string
+                    example: "'ids' key required in request body as json."
+
+      x-codeSamples:
+        - lang: 'Python'
+          source: |
+            import requests
+
+            response = requests.delete(
+              "localhost:6060/events",
+              json={
+                "ids": [1, 2]
+              }
+            ).json()
+
+            print(response)
+
+    post:
+      tags:
+        - events
+
+      summary: Create event
+      description: |
+        Create scheduled event, its possible to create multiple events with one call.
+        Just pass all of them as list of objects.
+
+        **KEEP IN MIND:** Event IDs must be unique
+      operationId: createEvent
+      
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                events:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        enum: ["time", "interval"]
+                      id:
+                        type: integer
+                        example: 1
+                      frequency:
+                        type: string
+                        description: |
+                          Depends of your event type, 
+                          available choices for interval events are **seconds**, **minutes** and **hours**
+
+                          available choices for time events are **daily**, **repeated**, **once**
+                      days:
+                        type: array
+                        enum: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+                        example: ["mon", "tue"]
+                        description: "!!! ONLY FOR TIME TYPED EVENTS !!!" 
+                      value:
+                        type: integer
+                        description: "!!! ONLY FOR INTERVAL TYPED EVENTS !!!" 
+                      is_one_shot:
+                        type: boolean
+                        description: "!!! ONLY FOR INTERVAL TYPED EVENTS !!!"
+                        example: false
+                      action:
+                        type: string
+                        enum: ["start", "shutdown_hard", "shutdown_soft", "reboot_hard", "reboot_soft", "start_soft"]
+                        example: "start"
+
+      responses:
+        '200':
+          description: Events created successfully
+
+      x-codeSamples:
+        - lang: 'Python'
+          source: |
+            import requests
+
+            requests.post(
+              "http://localhost:6060/events",
+              json={
+                "events": [
+                  {
+                    "id": 1,
+                    "type": "time",
+                    "time": "16:30",
+                    "frequency": "once",
+                    "days": "tue",
+                    "action": "start"
+                  }
+                ]
+              }
+            )
