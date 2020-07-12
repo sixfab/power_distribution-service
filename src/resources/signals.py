@@ -1,4 +1,4 @@
-from core import hat_api
+from ..core import hat_api
 
 def main(signal):
     signals = {

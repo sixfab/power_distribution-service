@@ -1,5 +1,5 @@
 import re
-from core import hat_api
+from ..core import hat_api
 
 
 def get_metric_by_sensor(sensor, metric):

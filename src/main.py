@@ -1,12 +1,13 @@
+from .urls import urls
 import os
 import time
-from flask import Flask, g, send_file
-from core.power_api import SixfabPower
-from helpers.exceptions import RetryLimitError
+from flask import Flask, session, send_file, request
+from .helpers.exceptions import RetryLimitError
+from . import app
 
-app = Flask(__name__)
-from urls import urls
-
+SECRET_KEY = "sixfab"
+SESSION_TYPE = 'filesystem'
+app.config.from_object(__name__)
 
 for methods, rule, endpoint in urls:
     app.add_url_rule(rule, endpoint.__name__, endpoint, methods=methods)
@@ -14,6 +15,8 @@ for methods, rule, endpoint in urls:
 
 @app.before_request
 def before_request_handler():
+    if "/locker/release" not in request.path and app.config.get("locked", False):
+      return {}, 500
     pass
 
 
@@ -61,8 +64,3 @@ def redoc():
 @app.route("/openapi")
 def return_openapi():
     return send_file(os.path.dirname(os.path.realpath(__file__)) + "/openapi.yaml")
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=6060, threaded=False, processes=1)
-

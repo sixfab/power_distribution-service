@@ -1,6 +1,6 @@
-from core import hat_api
-from core.definitions import Definition
-from core.event import Event
+from ..core import hat_api
+from power_api.definitions import Definition
+from power_api.event import Event
 from flask import request
 
 MAP_ACTIONS = {

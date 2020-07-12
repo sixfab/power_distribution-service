@@ -28,6 +28,9 @@ tags:
   - name: events
     description: Manage scheduled events
     x-displayName: Events
+  - name: locker
+    description: Manage the service
+    x-displayName: Locker
 x-tagGroups:
   - name: Endpoints
     tags:
@@ -35,6 +38,7 @@ x-tagGroups:
       - signals
       - configurations
       - events
+      - locker
 
 paths:
   /metrics/{sensor}/{metric}:
@@ -98,7 +102,7 @@ paths:
             import requests
 
             response = requests.get(
-              "localhost:6060/metrics/battery/temperature"
+              "http://localhost:6060/metrics/battery/temperature"
             ).json()
 
             print(response)
@@ -153,7 +157,7 @@ paths:
             import requests
 
             response = requests.get(
-              "localhost:6060/metrics/working_mode"
+              "http://localhost:6060/metrics/working_mode"
             ).json()
 
             print(response)
@@ -210,7 +214,7 @@ paths:
             import requests
 
             response = requests.get(
-              "localhost:6060/signals/system_temperature"
+              "http://localhost:6060/signals/system_temperature"
             ).json()
 
             print(response)
@@ -398,7 +402,7 @@ paths:
             import requests
 
             response = requests.get(
-              "localhost:6060/configurations/fan"
+              "http://localhost:6060/configurations/fan"
             ).json()
 
             print(response)
@@ -431,7 +435,7 @@ paths:
             import requests
 
             response = requests.get(
-              "localhost:6060/events"
+              "http://localhost:6060/events"
             ).json()
 
             print(response)
@@ -473,7 +477,7 @@ paths:
             import requests
 
             response = requests.delete(
-              "localhost:6060/events",
+              "http://localhost:6060/events",
               json={
                 "ids": [1, 2]
               }
@@ -558,3 +562,64 @@ paths:
                 ]
               }
             )
+
+  /locker/lock:
+    get:
+      tags:
+        - locker
+
+      summary: Lock service
+      description: |
+        Locks the distribution service, the service will return 503 for all requests during lock-time.
+        Maximum time for lock-down is 180 secs.
+      operationId: lockService
+
+      
+      responses:
+        '200':
+          description: Service locked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    default: Service locked.
+      
+      x-codeSamples:
+        - lang: 'Python'
+          source: |
+            import requests
+
+            response = requests.get("http://localhost:6060/locker/lock")
+
+  /locker/release:
+    get:
+      tags:
+        - locker
+
+      summary: Release service
+      description: |
+        Unlock/release the service.
+      operationId: releaseService
+
+      
+      responses:
+        '200':
+          description: Service released
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    default: Service released.
+      
+      x-codeSamples:
+        - lang: 'Python'
+          source: |
+            import requests
+
+            response = requests.get("http://localhost:6060/locker/release")

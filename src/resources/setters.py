@@ -1,5 +1,5 @@
 from flask import request
-from core import hat_api
+from ..core import hat_api
 
 
 def set_configurations():
