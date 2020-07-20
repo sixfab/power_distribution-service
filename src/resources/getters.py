@@ -68,6 +68,40 @@ def get_metric(metric):
     return {"metric": metric, "value": value}
 
 
+def get_all_metrics():
+    metrics = [
+        "working_mode",
+        "rtc",
+        "version",
+        "button1",
+        "button2"
+    ]
+
+    sensor_metrics = {
+        "battery": ("temperature", "voltage", "current", "power", "level", "health"),
+        "system": ("temperature", "voltage", "current", "power"),
+        "input": ("temperature", "voltage", "current", "power"),
+        "fan": ("health", "speed"),
+    }
+
+    response = {
+        "metrics": {}
+    }
+
+    for metric in metrics:
+        response["metrics"][metric] = get_metric(metric)["value"]
+
+
+    for sensor, metrics in sensor_metrics.items():
+        for metric in metrics: 
+            if sensor not in response["metrics"]:
+                response["metrics"][sensor] = {}
+                
+            response["metrics"][sensor][metric] = get_metric_by_sensor(sensor, metric)["value"]
+
+    return response
+
+
 def get_configurations(keyword):
     keywords = {
         "led": "get_rgb_animation",
@@ -112,3 +146,22 @@ def get_configurations(keyword):
         }
 
     return {"key": keyword, "value": value}
+
+
+def get_all_configurations():
+    configurations = [
+        "led",
+        "watchdog",
+        "fan",
+        "battery",
+        "rtc"
+    ]
+
+    response = {
+        "configurations": {}
+    }
+
+    for config in configurations:
+        response["configurations"][config] = get_configurations(config)["value"]
+
+    return response

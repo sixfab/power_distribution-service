@@ -15,14 +15,20 @@ for methods, rule, endpoint in urls:
 
 @app.before_request
 def before_request_handler():
-    if "/locker/release" not in request.path and app.config.get("locked", False):
-      return {}, 500
-    pass
+    is_service_locked = app.config.get("locked", False)
+
+    if is_service_locked:
+      if time.time() < is_service_locked:
+        is_service_locked = True
+      else:
+        is_service_locked = False
+
+    if is_service_locked and "/locker/release" not in request.path:
+      return {"err": "Service  unavailable, locked."}, 503
 
 
 @app.after_request
 def after_request_handler(response):
-    pass
     return response
 
 

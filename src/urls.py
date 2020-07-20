@@ -5,8 +5,12 @@ from .resources import events
 from .resources import locker
 
 urls = [
+    (['GET'], '/metrics', getters.get_all_metrics),
     (['GET'], '/metrics/<sensor>/<metric>', getters.get_metric_by_sensor),
     (['GET'], '/metrics/<metric>', getters.get_metric),
+
+
+    (['GET'], '/configurations', getters.get_all_configurations),
     (['GET'], '/configurations/<keyword>', getters.get_configurations),
 
     (['POST'], '/configurations', setters.set_configurations),
