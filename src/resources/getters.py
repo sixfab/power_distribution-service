@@ -162,6 +162,6 @@ def get_all_configurations():
     }
 
     for config in configurations:
-        response["configurations"][config] = get_configurations(config)
+        response["configurations"][config] = get_configurations(config)["value"]
 
     return response
