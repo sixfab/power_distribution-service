@@ -146,3 +146,22 @@ def get_configurations(keyword):
         }
 
     return {"key": keyword, "value": value}
+
+
+def get_all_configurations():
+    configurations = [
+        "led",
+        "watchdog",
+        "fan",
+        "battery",
+        "rtc"
+    ]
+
+    response = {
+        "configurations": {}
+    }
+
+    for config in configurations:
+        response["configurations"][config] = get_configurations(config)
+
+    return response
