@@ -41,6 +41,121 @@ x-tagGroups:
       - locker
 
 paths:
+  /metrics/:
+    get:
+      tags:
+        - metrics
+
+      summary: Get all metrics
+      description: Get all metrics
+      operationId: getAllMetric
+
+      
+      responses:
+        '200':
+          description: Returned all metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  metrics: 
+                    type: object
+                    properties:
+                      rtc:
+                        type: integer
+                        example: 1595216924
+                      button1:
+                        type: string
+                        enum: ["released", "short_press", "long_press"]
+                        example: released
+                      button2:
+                        type: string
+                        enum: ["released", "short_press", "long_press"]
+                        example: released
+                      fan:
+                        type: object
+                        properties:
+                          health: 
+                            type: integer
+                            enum: [1, 0]
+                            example: 1
+                          speed:
+                            type: integer
+                            example: 0
+                      version: 
+                        type: string
+                        example: 0.3.0
+                      working_mode:
+                        type: string
+                        enum: ["charging", "fully_charged", "battery_powered"]
+                        example: fully_charged
+                      battery:
+                        type: object
+                        properties:
+                          current:
+                            type: float
+                            example: 0.0
+                          health:
+                            type: integer
+                            example: 93
+                          level:
+                            type: integer
+                            example: 51
+                          power:
+                            type: float
+                            example: 0.0
+                          temperature:
+                            type: float
+                            example: 31.62
+                          voltage:
+                            type: float
+                            example: 3.954      
+                      input:
+                        type: object
+                        properties:
+                          current:
+                            type: float
+                            example: 0.3
+                          power:
+                            type: float
+                            example: 1.555
+                          temperature:
+                            type: float
+                            example: 33.75
+                          voltage:
+                            type: float
+                            example: 5.184      
+                      system:
+                        type: object
+                        properties:
+                          current:
+                            type: float
+                            example: 0.364
+                          power:
+                            type: float
+                            example: 2.188
+                          temperature:
+                            type: float
+                            example: 52.6
+                          voltage:
+                            type: float
+                            example: 5.16
+
+
+      x-codeSamples:
+        - lang: 'Python'
+          source: |
+            import requests
+
+            response = requests.get(
+              "http://localhost:6060/metrics"
+            ).json()
+
+            print(response)
+
+
+
   /metrics/{sensor}/{metric}:
     parameters:
       - name: sensor
@@ -220,7 +335,6 @@ paths:
             print(response)
 
 
-
   /configurations:
     post:
       tags:
@@ -351,6 +465,79 @@ paths:
             )
 
 
+  /configurations/:
+    get:
+      tags:
+        - configurations
+
+      summary: Get all configs
+      description: Get all configurations
+      operationId: getConfigurations
+
+      responses:
+        '200':
+          description: Configurations returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  configurations:
+                    type: object
+                    properties:
+                      battery: 
+                        type: object
+                        properties:
+                          design_capacity: 
+                            type: integer
+                            example: 2500
+                          max_charge: 
+                            type: integer
+                            example: 80
+                          safe_shutdown: 
+                            type: integer
+                            example: 20
+                      fan:
+                        type: object
+                        properties:
+                          fast_threshold: 
+                            type: integer
+                            example: 100
+                          slow_threshold: 
+                            type: integer
+                            example: 40
+                      led:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            example: heartbeat
+                          color: 
+                            type: string
+                            example: green
+                          speed: 
+                            type: string
+                            example: fast
+                      rtc:
+                        type: integer
+                        example: 1595216521
+                      watchdog:
+                        type: boolean
+                        example: false
+                          
+      
+      x-codeSamples:
+        - lang: 'Python'
+          source: |
+            import requests
+
+            response = requests.get(
+              "http://localhost:6060/configurations"
+            ).json()
+
+            print(response)
+
+
   /configurations/{configKey}:
     parameters:
       - name: configKey
@@ -365,7 +552,7 @@ paths:
       tags:
         - configurations
 
-      summary: Get config
+      summary: Get spesific config
       description: Get current value of configurations
       operationId: getConfigByKey
 
@@ -563,6 +750,7 @@ paths:
               }
             )
 
+
   /locker/lock:
     get:
       tags:
@@ -593,6 +781,7 @@ paths:
             import requests
 
             response = requests.get("http://localhost:6060/locker/lock")
+
 
   /locker/release:
     get:
