@@ -24,7 +24,6 @@ paho-mqtt==1.5.0
 pycrypto==2.6.1
 PyGObject==3.30.4
 pyrsistent==0.16.0
-python-apt==1.8.4.1
 pyxdg==0.25
 PyYAML==5.3.1
 requests==2.21.0
