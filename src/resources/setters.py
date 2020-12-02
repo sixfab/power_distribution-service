@@ -65,10 +65,23 @@ def set_configurations():
                 fast_threshold=value.get("fast_threshold", 100),
             )
 
+            fan_modes={"always_on": 1, "disabled": 2, "smart_cooling": 3}
+
+            hat_api(
+                "set_fan_mode",
+                fan_modes.get(value.get("mode", "smart_cooling"), "smart_cooling")
+            )
+
         if key == "battery":
             if "safe_shutdown_level" in value:
                 hat_api("set_safe_shutdown_battery_level",
                         value["safe_shutdown_level"])
+
+                if value["safe_shutdown_level"] == 0:
+                    hat_api("set_safe_shutdown_status", 2)
+                else:
+                    hat_api("set_safe_shutdown_status", 1)
+
 
             if "max_charge_level" in value:
                 hat_api("set_battery_max_charge_level",
