@@ -112,7 +112,7 @@ def set_configurations():
                 hat_api("set_watchdog_interval", value["interval"])
 
         if key == "power_outage":
-            if type(value.get("enabled"), None) == bool:
+            if type(value.get("enabled", None)) == bool:
                 hat_api("set_power_outage_event_status",{True: 1, False: 2}[value["enabled"]])
 
             hat_api(
