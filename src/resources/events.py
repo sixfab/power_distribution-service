@@ -142,5 +142,5 @@ def create_event():
         hat_api("create_scheduled_event_with_event", event_to_save)
         sleep(.2)
 
-    return True
+    return {"msg": "Events updated successfully."}
 
