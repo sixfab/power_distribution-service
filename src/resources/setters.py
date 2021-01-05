@@ -22,8 +22,9 @@ def set_configurations():
         "fan": ["slow_threshold"],
         "battery": [],
         "rtc": ["timestamp"],
-        "watchdog": ["is_enabled"],
+        "watchdog": ["status"],
         "rgb": ["type"],
+        "power_outage": ["enabled", "run_time", "sleep_time"]
     }
 
     if not request_json:
@@ -91,12 +92,34 @@ def set_configurations():
                 hat_api("set_battery_design_capacity",
                         value["design_capacity"])
 
+            if "is_seperated" in value and type(value.get("is_seperated")) == bool:
+                hat_api(
+                    "set_battery_separation_status",
+                    {
+                        True: 1,
+                        False: 2
+                    }[value["is_seperated"]]
+                )
+                
         if key == "rtc":
             hat_api("set_rtc_time", value["timestamp"])
 
         if key == "watchdog":
-            hat_api("set_watchdog_status", {
-                    True: 1, False: 2}[value["is_enabled"]])
+            if "status" in value:
+                hat_api("set_watchdog_status", {
+                        True: 1, False: 2}[value["status"]])
+            if value.get("status", False) and "interval" in value:
+                hat_api("set_watchdog_interval", value["interval"])
+
+        if key == "power_outage":
+            if type(value.get("enabled", None)) == bool:
+                hat_api("set_power_outage_event_status",{True: 1, False: 2}[value["enabled"]])
+
+            hat_api(
+                "set_power_outage_params", 
+                value.get("sleep_time", 10),
+                value.get("run_time", 10)
+            )
 
         if key == "rgb":
             if value["type"] not in ("disabled", "heartbeat", "temperature_map"):

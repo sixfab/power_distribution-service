@@ -6,8 +6,9 @@ def main(signal):
         'soft_shutdown': "soft_power_off", 
         'hard_reboot': "hard_reboot", 
         'hard_shutdown': "hard_power_off", 
-        'system_temperature': "send_system_temp", 
-        'watchdog_alarm': "ask_watchdog_alarm"
+        'system_temperature': "send_system_temp",
+        'battery_temperature': "send_battery_temp",
+        'watchdog': "watchdog_signal"
     }
 
     if signal not in signals.keys():
@@ -15,4 +16,4 @@ def main(signal):
 
     value = hat_api(signals[signal])
 
-    return {"value": {1: True, 2: False}[value]}, 200
+    return {"value": {1: True, 2: False}.get(value, None)}, 200

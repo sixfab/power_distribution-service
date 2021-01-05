@@ -2,6 +2,7 @@ from ..core import hat_api
 from power_api.definitions import Definition
 from power_api.event import Event
 from flask import request
+from time import sleep
 
 MAP_ACTIONS = {
     "start": Definition.HARD_POWER_ON,
@@ -139,5 +140,7 @@ def create_event():
             )
 
         hat_api("create_scheduled_event_with_event", event_to_save)
+        sleep(.2)
 
-    return "asd"
+    return {"msg": "Events updated successfully."}
+
